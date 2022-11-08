@@ -77,6 +77,22 @@ app.get('/services/:id', async (req, res) => {
     res.send(service)
 })
 
+const Review = client.db('ServicesDB').collection('review')
+app.post('/review', async(req, res) => {
+    const id = req.params.id;
+
+    const review = await Review.insertOne(req.body)
+})
+
+app.get('/review/:id', async (req, res) => {
+    const id = req.params.id;
+    console.log(id)
+    const cursor = Review.find({reviewSerId: id});
+    const review = await cursor.toArray();
+    console.log("🚀 ~ file: index.js ~ line 91 ~ app.get ~ cursor", review)
+    res.send(review);
+})
+
 app.get('/', (req, res) => {
     res.send('Server started successfully');
 })
