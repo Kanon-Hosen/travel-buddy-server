@@ -51,6 +51,23 @@ app.post('/services', async (req, res) => {
     }
 })
 
+app.delete('/service/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const service = await Services.deleteOne({ _id: ObjectId(id) });
+        if (service.deletedCount) {
+            res.send({
+              success: true,
+              message: "Delete Successfully",
+            });
+          }
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
 // * service get::::::::::::::::::::::::::::
 app.get('/services', async (req, res) => {
     try {
@@ -68,6 +85,30 @@ app.get('/services', async (req, res) => {
             data:[]
         })
     }
+})
+
+app.patch('/service/:id', async (req, res) => {
+
+    try {
+        const id = req.params.id;
+            const result = await Services.updateOne({ _id: ObjectId(id) }, { $set: req.body })
+            if (result.matchedCount) {
+                res.send({
+                  success: true,
+                  message: "Update successfully",
+                });
+              } else {
+                res.send({
+                  success: false,
+                  message: "Update unsuccessfull",
+                });
+              }
+        } catch (error) {
+            res.send({
+                success: false,
+                message: 'Unsuccessfull'
+            })
+        }
 })
 
 app.get('/services/:id', async (req, res) => {
