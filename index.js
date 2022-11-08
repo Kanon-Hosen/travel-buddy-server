@@ -77,6 +77,8 @@ app.get('/services/:id', async (req, res) => {
     res.send(service)
 })
 
+// Review ::::::::::::::::::::::::::::::::::::::::::::::::::
+
 const Review = client.db('ServicesDB').collection('review')
 
 app.post('/review', async(req, res) => {
@@ -89,6 +91,34 @@ app.get('/review/:id', async (req, res) => {
     const cursor = Review.find({reviewSerId: id});
     const review = await cursor.toArray();
     res.send(review);
+})
+app.get('/editreview/:id', async (req, res) => {
+    const id = req.params.id;
+    const cursor = await Review.findOne({_id: ObjectId(id)});
+    res.send(cursor);
+})
+app.patch('/editreview/:id', async (req, res) => {
+
+    try {
+    const id = req.params.id;
+        const result = await Review.updateOne({ _id: ObjectId(id) }, { $set: req.body })
+        if (result.matchedCount) {
+            res.send({
+              success: true,
+              message: "Update successfully",
+            });
+          } else {
+            res.send({
+              success: false,
+              message: "Update unsuccessfull",
+            });
+          }
+    } catch (error) {
+        res.send({
+            success: false,
+            message: 'Unsuccessfull'
+        })
+    }
 })
 
 app.get('/', (req, res) => {
