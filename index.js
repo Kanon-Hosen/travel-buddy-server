@@ -162,6 +162,24 @@ app.patch('/editreview/:id', async (req, res) => {
     }
 })
 
+app.delete('/review/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const review = await Review.deleteOne({ _id: ObjectId(id) });
+        if (review.deletedCount) {
+            res.send({
+              success: true,
+              message: "Delete Successfully",
+            });
+          }
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
 app.get('/', (req, res) => {
     res.send('Server started successfully');
 })
