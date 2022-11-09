@@ -72,6 +72,23 @@ app.delete('/service/:id', async (req, res) => {
 app.get('/services', async (req, res) => {
     try {
         const cursor = Services.find({});
+        const services = await cursor.limit(3).toArray();
+        res.send({
+            success: true,
+            message: "Success",
+            data:services
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message,
+            data:[]
+        })
+    }
+})
+app.get('/servicesall', async (req, res) => {
+    try {
+        const cursor = Services.find({});
         const services = await cursor.toArray();
         res.send({
             success: true,
