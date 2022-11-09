@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -25,6 +26,28 @@ dbConnect()
 
 const Services = client.db('ServicesDB').collection('services');
 
+app.post('/jwt', (req, res) => {
+    const user = req.body;
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+    res.send({token})
+})
+
+const verifyJwt = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+        return res.status(401).send({message: "Unauthorized user"})
+    }
+    const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+        if (err) {
+           return res.status(401).send({message: "Unauthorized user"})
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
 app.post('/services', async (req, res) => {
     try {
         const body = req.body;
@@ -90,10 +113,11 @@ app.get('/servicesall', async (req, res) => {
     try {
         const cursor = Services.find({});
         const services = await cursor.toArray();
+        const mainData = [...services].reverse()
         res.send({
             success: true,
             message: "Success",
-            data:services
+            data:mainData
         })
     } catch (error) {
         res.send({
@@ -147,6 +171,17 @@ app.post('/review', async(req, res) => {
 app.get('/review/:id', async (req, res) => {
     const id = req.params.id;
     const cursor = Review.find({reviewSerId: id});
+    const review = await cursor.toArray();
+    res.send(review);
+})
+app.get('/myreview', verifyJwt, async (req, res) => {
+    const query = req.query.name;
+    const decoded = req.decoded;
+
+    if (decoded.email !== req.query.email) {
+        res.status(403).send({message:"Unauthorized access"})
+    }
+    const cursor = Review.find({username: query});
     const review = await cursor.toArray();
     res.send(review);
 })
